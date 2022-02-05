@@ -13,14 +13,20 @@ const game = new createGame();
 
 io.on('connection', (socket) => {
     console.log(socket.id);
+    socket.join('clientJoin');
+    io.sockets.emit('clientJoin', game);
 
     socket.on('join_room', (playerData) => {
         playerData['socket'] = socket.id;
         let status = game.joinPlayer(playerData);
-        if(!status)
-            console.log('There is already a player with this name in this room');
-        else
+        if(!status) {
+            socket.emit('wait', false);
+        }
+        else {
             console.log(`[LOG] Player ${playerData.username} joined room ${playerData.room}`);
+            socket.emit('wait', true);
+            io.sockets.emit('clientJoin', game);
+        }
     });
 
     socket.on('disconnect', () => {
