@@ -51,7 +51,17 @@ class Room {
         else if(grid[0][2] == grid[1][2] && grid[1][2] == grid[2][2]) winner = grid[0][2];
         else if(grid[0][0] == grid[1][1] && grid[1][1] == grid[2][2]) winner = grid[0][0];
         else if(grid[0][2] == grid[1][1] && grid[1][1] == grid[2][0]) winner = grid[0][2];
-        return winner > 0 ? this.players[winner-1].username : -1;
+
+        let full = true;
+        for(let i = 0; i < 3; i++) {
+            for(let j = 0; j < 3; j++) {
+                if(!grid[i][j])
+                    full = false;
+            }
+        }
+
+        console.log(winner, full);
+        return full && winner > 0 ? this.players[winner-1].username : full ? 3 : -1;
     }
 
 }

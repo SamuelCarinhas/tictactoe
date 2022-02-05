@@ -17,6 +17,7 @@ function App() {
   const [started, setStarted] = useState(false);
   const [isPlaying, setPlaying] = useState(true);
   const [winner, setWinner] = useState('');
+  const [draw, setDraw] = useState(false);
   const [grid, setGrid] = useState([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
 
   useEffect(() => {
@@ -49,6 +50,10 @@ function App() {
           setWinner(winner);
           setPlaying(false);
         });
+        socket.on('draw', () => {
+          setDraw(true);
+          setPlaying(false);
+        });
       } else {
         setError('Username and roomn should have a length less than 15')
       }
@@ -64,7 +69,7 @@ function App() {
   }
 
   const playPiece = (line, col) => {
-    if(!isPlaying)
+    if(!isPlaying || grid[line][col])
       return;
     socket.emit('play', {line: line, col: col});
   }
@@ -123,6 +128,9 @@ function App() {
         started ?
         <div>
           {
+            draw ?
+            <Alert variant='warning' className='join'>Draw</Alert>
+            :
             winner ?
             <Alert variant='success' className='join'>{`WINNER: ${winner}`}</Alert>
             :

@@ -39,7 +39,12 @@ io.on('connection', (socket) => {
 
         io.to(data.room).emit('play', data.grid, data.next);
         if(data.winner != -1) {
-            io.to(data.room).emit('win', data.winner);
+            if(data.winner == 3) {
+                console.log('DRAW')
+                io.to(data.room).emit('draw');
+            } else {
+                io.to(data.room).emit('win', data.winner);
+            }
         }
     })
 
