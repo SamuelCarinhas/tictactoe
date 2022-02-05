@@ -43,14 +43,14 @@ class Room {
     getWinner() {
         let winner = -1;
         let grid = this.grid;
-        if(grid[0][0] == grid[0][1] && grid[0][1] == grid[0][2]) winner = max(winner, grid[0][0]);
-        if(grid[1][0] == grid[1][1] && grid[1][1] == grid[1][2]) winner = max(winner, grid[1][0]);
-        if(grid[2][0] == grid[2][1] && grid[2][1] == grid[2][2]) winner = max(winner, grid[2][0]);
-        if(grid[0][0] == grid[1][0] && grid[1][0] == grid[2][0]) winner = max(winner, grid[0][0]);
-        if(grid[0][1] == grid[1][1] && grid[1][1] == grid[2][1]) winner = max(winner, grid[0][1]);
-        if(grid[0][2] == grid[1][2] && grid[1][2] == grid[2][2]) winner = max(winner, grid[0][2]);
-        if(grid[0][0] == grid[1][1] && grid[1][1] == grid[2][2]) winner = max(winner, grid[0][0]);
-        if(grid[0][2] == grid[1][1] && grid[1][1] == grid[2][0]) winner = max(winner, grid[0][2]);
+        if(grid[0][0] == grid[0][1] && grid[0][1] == grid[0][2]) winner = Math.max(winner, grid[0][0]);
+        if(grid[1][0] == grid[1][1] && grid[1][1] == grid[1][2]) winner = Math.max(winner, grid[1][0]);
+        if(grid[2][0] == grid[2][1] && grid[2][1] == grid[2][2]) winner = Math.max(winner, grid[2][0]);
+        if(grid[0][0] == grid[1][0] && grid[1][0] == grid[2][0]) winner = Math.max(winner, grid[0][0]);
+        if(grid[0][1] == grid[1][1] && grid[1][1] == grid[2][1]) winner = Math.max(winner, grid[0][1]);
+        if(grid[0][2] == grid[1][2] && grid[1][2] == grid[2][2]) winner = Math.max(winner, grid[0][2]);
+        if(grid[0][0] == grid[1][1] && grid[1][1] == grid[2][2]) winner = Math.max(winner, grid[0][0]);
+        if(grid[0][2] == grid[1][1] && grid[1][1] == grid[2][0]) winner = Math.max(winner, grid[0][2]);
 
         let full = true;
         for(let i = 0; i < 3; i++) {
