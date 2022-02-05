@@ -46,7 +46,9 @@ class Game {
     disconnectPlayer(socket) {
         if(!(socket in this.sockets)) return;
         this.rooms[this.sockets[socket]].disconnectPlayer(socket);
-        this.sockets[socket] = undefined;
+        if(this.rooms[this.sockets[socket]].activePlayers.length == 0)
+            delete this.rooms[this.sockets[socket]];
+        delete this.sockets[socket];
     }
 
 }
