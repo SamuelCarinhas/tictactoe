@@ -3,13 +3,20 @@ import { Server } from 'socket.io';
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
-
+    cors: {
+        origin: '*'
+    }
 });
 
 io.on('connection', (socket) => {
-    console.log('Connected: ', socket.id);
+    console.log(socket.id);
+
+    socket.on('join_room', (data) => {
+        socket.join(data);
+        console.log('USER JOINED ROOM:', data);
+    });
 });
 
-httpServer.listen(3000, () => {
-    console.log('Server listening on port: 3000');
+httpServer.listen(4000, () => {
+    console.log('Server listening on port: 4000');
 });
