@@ -14,16 +14,19 @@ function App() {
   const [room, setRoom] = useState('');
   const [username, setUsername] = useState('');
   const [game, setGame] = useState({rooms: {}});
+  const [started, setStarted] = useState(false);
+  const [isPlaying, setPlaying] = useState(true);
+  const [winner, setWinner] = useState('');
+  const [grid, setGrid] = useState([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
 
   useEffect(() => {
-    console.log('Socket created');
     socket = io(CONNECTION_STRING);
     socket.on('clientJoin', (data) => {
       setGame(data);
     });
     socket.on('wait', (status) => {
       if(!status)
-        setError('Someone is already using this name in this room');
+        setError('Someone is already using this name in this room or the game already started');
       else
         setError('');
       setWaiting(status);
@@ -31,7 +34,39 @@ function App() {
   }, []);
 
   const connectToRoom = () => {
-    socket.emit('join_room', {'username': username, 'room': room});
+    if(username.trim() && room.trim()) {
+      if(username.length < 15 && room.length < 15) {
+        socket.emit('join_room', {'username': username, 'room': room});
+        socket.on('start', (starter) => {
+          setStarted(true);
+          setPlaying(starter === username);
+        });
+        socket.on('play', (gameGrid, next) => {
+          setGrid(gameGrid);
+          setPlaying(next === username);
+        });
+        socket.on('win', (winner) => {
+          setWinner(winner);
+          setPlaying(false);
+        });
+      } else {
+        setError('Username and roomn should have a length less than 15')
+      }
+    } else {
+      setError('Invalid room or username')
+    }
+  }
+
+  const getPiece = (line, col) => {
+    let status = grid[line][col];
+
+    return status === 0 ? 'empty.png' : status === 1 ? 'circle.png' : 'cross.png';
+  }
+
+  const playPiece = (line, col) => {
+    if(!isPlaying)
+      return;
+    socket.emit('play', {line: line, col: col});
   }
 
   return (
@@ -84,6 +119,31 @@ function App() {
             Play
           </Button>
         </Form>
+        :
+        started ?
+        <div>
+          {
+            winner ?
+            <Alert variant='success' className='join'>{`WINNER: ${winner}`}</Alert>
+            :
+            <Alert variant='info' className='join'>{isPlaying ? 'Its your turn' : 'Waiting for your opponent'}</Alert>
+          }
+          <div>
+            <img className="piece" src={getPiece(0, 0)} onClick={() => playPiece(0, 0)} />
+            <img className="piece" src={getPiece(0, 1)} onClick={() => playPiece(0, 1)} />
+            <img className="piece" src={getPiece(0, 2)} onClick={() => playPiece(0, 2)} />
+          </div>
+          <div>
+            <img className="piece" src={getPiece(1, 0)} onClick={() => playPiece(1, 0)} />
+            <img className="piece" src={getPiece(1, 1)} onClick={() => playPiece(1, 1)} />
+            <img className="piece" src={getPiece(1, 2)} onClick={() => playPiece(1, 2)} />
+          </div>
+          <div>
+            <img className="piece" src={getPiece(2, 0)} onClick={() => playPiece(2, 0)} />
+            <img className="piece" src={getPiece(2, 1)} onClick={() => playPiece(2, 1)} />
+            <img className="piece" src={getPiece(2, 2)} onClick={() => playPiece(2, 2)} />
+          </div>
+        </div>
         :
         <Alert variant='info' className="join">
           Waiting for more players...

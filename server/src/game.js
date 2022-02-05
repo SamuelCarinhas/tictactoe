@@ -3,6 +3,8 @@ class Room {
     constructor(name) {
         this.name = name;
         this.players = [];
+        this.grid = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+        this.current = 0;  
     }
 
     get activePlayers() {
@@ -10,7 +12,7 @@ class Room {
     }
 
     joinPlayer(playerData) {
-        if(this.players.some(player => player.username == playerData.username))
+        if(this.players.some(player => player.username === playerData.username))
             return false;
         
         this.players.push(playerData);
@@ -19,6 +21,37 @@ class Room {
 
     disconnectPlayer(socket) {
         this.players = this.players.filter((player) => player.socket !== socket);
+    }
+
+    play(socket, payload) {
+        let piece = 2;
+        if(this.players[0].socket === socket)
+            piece = 1;
+        this.grid[payload.line][payload.col] = piece;
+        return this.grid;
+    }
+
+    get starter() {
+        return this.players[this.current].username;
+    }
+
+    next() {
+        this.current = (this.current + 1) % 2;
+        return this.players[this.current].username;
+    }
+
+    getWinner() {
+        let winner = -1;
+        let grid = this.grid;
+        if(grid[0][0] == grid[0][1] && grid[0][1] == grid[0][2]) winner = grid[0][0];
+        else if(grid[1][0] == grid[1][1] && grid[1][1] == grid[1][2]) winner = grid[1][0];
+        else if(grid[2][0] == grid[2][1] && grid[2][1] == grid[2][2]) winner = grid[2][0];
+        else if(grid[0][0] == grid[1][0] && grid[1][0] == grid[2][0]) winner = grid[0][0];
+        else if(grid[0][1] == grid[1][1] && grid[1][1] == grid[2][1]) winner = grid[0][1];
+        else if(grid[0][2] == grid[1][2] && grid[1][2] == grid[2][2]) winner = grid[0][2];
+        else if(grid[0][0] == grid[1][1] && grid[1][1] == grid[2][2]) winner = grid[0][0];
+        else if(grid[0][2] == grid[1][1] && grid[1][1] == grid[2][0]) winner = grid[0][2];
+        return winner > 0 ? this.players[winner-1].username : -1;
     }
 
 }
@@ -38,8 +71,10 @@ class Game {
         if(!(playerData.room in this.rooms))
             this.rooms[playerData.room] = new Room(playerData.room);
         let res = this.rooms[playerData.room].joinPlayer(playerData);
-        if(res)
+        if(res) {
             this.sockets[playerData.socket] = playerData.room;
+            return  this.rooms[playerData.room].players.length;
+        }
         return res;
     }
 
@@ -49,6 +84,17 @@ class Game {
         if(this.rooms[this.sockets[socket]].activePlayers.length == 0)
             delete this.rooms[this.sockets[socket]];
         delete this.sockets[socket];
+    }
+
+    play(socket, payload) {
+        let grid = this.rooms[this.sockets[socket]].play(socket, payload);
+        let winner = this.rooms[this.sockets[socket]].getWinner();
+        
+        return  {room: this.sockets[socket], grid: grid, next: this.rooms[this.sockets[socket]].next(), winner: winner};
+    }
+
+    getStarter(room) {
+        return this.rooms[room].starter;
     }
 
 }

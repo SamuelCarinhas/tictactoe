@@ -59,3 +59,10 @@ html {
 .dummy {
     width: 100%;
 }
+
+.piece {
+    display: inline-block;
+    margin: 10px;
+    width: 100px;
+    height: 100px;
+}
